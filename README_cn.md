@@ -1,14 +1,8 @@
 # Gugle的Carpet附加包 [ [English](README.md) | 中文 ]
 
-[![Development Builds](https://github.com/Gu-ZT/gugle-carpet-addition/workflows/Build%20Mod/badge.svg)](https://github.com/Gu-ZT/gugle-carpet-addition/actions/workflows/ci.yml)
-[![CurseForge downloads](http://cf.way2muchnoise.eu/full_662867_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/guglecarpetaddition)
-[![Modrinth downloads](https://img.shields.io/modrinth/dt/gca?color=00AF5C&label=Modrinth%20downloads&logo=modrinth)](https://modrinth.com/mod/gca)
-[![GitHub downloads](https://img.shields.io/github/downloads/Gu-ZT/gugle-carpet-addition/total?label=Github%20downloads&logo=github)](https://github.com/Gu-ZT/gugle-carpet-addition/releases)
 ![menu](docs/pics/menu_zh.png)
 
 ## GCA
-
-#### 如果你需要Minecraft 1.13版本的GCA, [请点击此处](https://github.com/Gu-ZT/TISCarpet113WithGCA/releases/latest)
 
 ### 假人背包
 
