@@ -80,8 +80,8 @@ dependencies {
     }
     neoForge "net.neoforged:neoforge:${project.neoforge_version}"
 
-    // fabric-carpet
-    modImplementation("org.thinkingstudio.bedsheet:bedsheet:${project.carpet_core_version}")
+    // bedsheet
+    modImplementation("maven.modrinth:bedsheet:${project.carpet_core_version}")
     // jep
     include(implementation 'jep:jep:2.24')
     // mixin-extras

@@ -1,16 +1,16 @@
 plugins {
-    id "fabric-loom" version "1.7-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
     id "maven-publish"
     id "com.replaymod.preprocess" version "88169fcbc9"
 }
 
 preprocess {
-    def mc1201 = createNode("1.20.1", 1_20_01, "official")
+    //def mc1201 = createNode("1.20.1", 1_20_01, "official")
     def mc1211 = createNode("1.21.1", 1_21_01, "official")
     def mc1214 = createNode("1.21.4", 1_21_04, "official")
     def mc1215 = createNode("1.21.5", 1_21_05, "official")
 
-    mc1201.link(mc1211, null)
+    //mc1201.link(mc1211, null)
     mc1214.link(mc1211, null)
     mc1215.link(mc1211, null)
 }

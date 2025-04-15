@@ -22,7 +22,6 @@ import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
 import dev.dubhe.gugle.carpet.tools.serializer.DimTypeSerializer;
-import net.fabricmc.api.ModInitializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -35,6 +34,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.thinkingstudio.bedsheet.loader.entrypoint.ModInitializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
