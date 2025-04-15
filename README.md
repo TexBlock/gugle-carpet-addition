@@ -1,4 +1,6 @@
-# Gugle's Carpet Addition for BedSheet Mod [ English | [中文](README_cn.md) ]
+# BedSheetGCA
+
+GCA unofficial neoforge port
 
 ![menu](docs/pics/menu_en.png)
 
