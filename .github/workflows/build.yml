@@ -1,14 +1,6 @@
 name: Mod Build
 
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - src/**
-      - versions/**
-      - build.gradle
-      - gradle.properties
-      - settings.gradle
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -24,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java 21
-        uses: actions/setup-java@v3.6.0
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 21
