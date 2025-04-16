@@ -3,8 +3,6 @@ name: Mod Build
 on:
   workflow_dispatch:
   push:
-    branches:
-      - releases/**
     paths:
       - src/**
       - versions/**
@@ -44,7 +42,8 @@ jobs:
       - name: Build
         run: ./gradlew build
 
-      - run: ./gradlew build publishMods
-        env:
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: ${{ github.workspace }}/**/build/libs
