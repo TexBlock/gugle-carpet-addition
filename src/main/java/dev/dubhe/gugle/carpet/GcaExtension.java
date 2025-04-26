@@ -34,7 +34,6 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.thinkingstudio.bedsheet.loader.entrypoint.ModInitializer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class GcaExtension implements CarpetExtension, ModInitializer {
+public class GcaExtension implements CarpetExtension {
     private static final HashSet<EntityPlayerMPFake> RESIDENT_PLAYERS = new HashSet<>();
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
@@ -165,7 +164,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         return ComponentTranslate.getTranslations(lang);
     }
 
-    @Override
     public void onInitialize() {
         CarpetServer.manageExtension(this);
     }
