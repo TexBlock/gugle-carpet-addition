@@ -40,4 +40,4 @@ jobs:
           name: Artifacts
           path: |
             ${{ github.workspace }}/**/build/libs
-            ${{ github.workspace }}/**/processed
+            ${{ github.workspace }}/**/build/preprocessed
