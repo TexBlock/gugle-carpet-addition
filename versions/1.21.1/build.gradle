@@ -1,0 +1,157 @@
+plugins {
+    id "me.modmuss50.mod-publish-plugin" version "0.8.3"
+}
+
+apply plugin: 'dev.architectury.loom'
+apply plugin: 'com.replaymod.preprocess'
+
+int mcVersion = 1
+
+ext {
+    getVersionSuffix = {
+        String buildNumber
+        String buildType = 'build'
+        if (System.getenv("CI_BUILD") == 'false') buildNumber = null
+        else {
+            if (System.getenv("PR_BUILD") != 'false') buildType = 'pr'
+            buildNumber = System.getenv("GITHUB_RUN_NUMBER")
+        }
+        String versionSuffix = (buildNumber != null ? "+${buildType}.${buildNumber}" : "")
+        return versionSuffix
+    }
+}
+
+preprocess {
+    mcVersion = vars.get()["MC"] as int
+    tabIndentation = true
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        name 'mavenCentral'
+        url 'https://repo1.maven.org/maven2/'
+    }
+    maven {
+        name 'CjsahMaven'
+        url 'https://server.cjsah.net:1002/maven/'
+    }
+    maven {
+        name 'CurseMaven'
+        url "https://www.cursemaven.com"
+    }
+    maven {
+        name "ModrinthMaven"
+        url "https://api.modrinth.com/maven"
+    }
+    maven {
+        name "NeoForged"
+        url "https://maven.neoforged.net/releases/"
+    }
+}
+
+loom {
+    accessWidenerPath = file("gca.accesswidener")
+}
+
+remapJar {
+    atAccessWideners.add("gca.accesswidener")
+    //remapperIsolation = true
+}
+
+JavaVersion SOURCE_JAVA_VERSION
+JavaVersion TARGET_JAVA_VERSION
+if (mcVersion >= 12005) {
+    SOURCE_JAVA_VERSION = JavaVersion.VERSION_21
+    TARGET_JAVA_VERSION = JavaVersion.VERSION_21
+} else if (mcVersion >= 11800) {
+    SOURCE_JAVA_VERSION = JavaVersion.VERSION_17
+    TARGET_JAVA_VERSION = JavaVersion.VERSION_17
+} else if (mcVersion >= 11700) {
+    SOURCE_JAVA_VERSION = JavaVersion.VERSION_16
+    TARGET_JAVA_VERSION = JavaVersion.VERSION_16
+} else {
+    SOURCE_JAVA_VERSION = JavaVersion.VERSION_1_8
+    TARGET_JAVA_VERSION = JavaVersion.VERSION_17
+}
+JavaVersion MIXIN_COMPATIBILITY_LEVEL = TARGET_JAVA_VERSION
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+    }
+    neoForge "net.neoforged:neoforge:${project.neoforge_version}"
+
+    // bedsheet
+    modImplementation("maven.modrinth:bedsheet:${project.carpet_core_version}")
+    // jep
+    include(implementation 'jep:jep:2.24')
+    // mixin-extras
+    if (mcVersion < 12100) {
+        include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-neoforge:${project.mixinextras_version}")))
+    }
+}
+
+String versionSuffix = project.getVersionSuffix()
+
+String fullModVersion = project.mod_version + versionSuffix
+
+version = 'v' + fullModVersion
+group = project.maven_group
+archivesBaseName = project.archives_base_name + '-mc' + project.minecraft_version
+
+processResources {
+    from "gca.accesswidener"
+
+    inputs.property "version", project.version
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        def valueMap = [
+                "version"                   : fullModVersion,
+                "neoforge_version_rage"     : project.neoforgeVersionRage,
+                "minecraft_version_rage"    : project.minecraftVersionRage,
+                "bedsheet_version_rage"     : project.bedsheetVersionRage
+        ]
+        expand valueMap
+    }
+
+    filesMatching("quickbackupmulti.mixins.json") {
+        filter {
+            text -> text.replace("/*JAVA_VERSION*/", "JAVA_${MIXIN_COMPATIBILITY_LEVEL.ordinal() + 1}")
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = SOURCE_JAVA_VERSION
+    targetCompatibility = TARGET_JAVA_VERSION
+}
+
+publishMods {
+    file = remapJar.archiveFile
+    changelog = "Changelog"
+    type = BETA
+    modLoaders.add("neoforge")
+
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        //projectId = "662867"
+        minecraftVersions.add(project.game_versions)
+    }
+
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        //projectId = "UHjbX5mk"
+        minecraftVersions.add(project.game_versions)
+    }
+}
+
+jar {
+    from "LICENSE"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}

@@ -22,7 +22,6 @@ import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
 import dev.dubhe.gugle.carpet.tools.serializer.DimTypeSerializer;
-import net.fabricmc.api.ModInitializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -49,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class GcaExtension implements CarpetExtension, ModInitializer {
+public class GcaExtension implements CarpetExtension {
     private static final HashSet<EntityPlayerMPFake> RESIDENT_PLAYERS = new HashSet<>();
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
@@ -165,7 +164,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         return ComponentTranslate.getTranslations(lang);
     }
 
-    @Override
     public void onInitialize() {
         CarpetServer.manageExtension(this);
     }

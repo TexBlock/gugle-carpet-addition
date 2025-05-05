@@ -13,6 +13,8 @@ pluginManagement {
             name = 'Jitpack'
             url = "https://jitpack.io"
         }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
         resolutionStrategy {
             eachPlugin {
                 switch (requested.id.id) {

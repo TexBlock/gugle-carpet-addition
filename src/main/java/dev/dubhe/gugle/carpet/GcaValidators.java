@@ -3,14 +3,14 @@ package dev.dubhe.gugle.carpet;
 import carpet.api.settings.CarpetRule;
 import carpet.api.settings.Rule;
 import carpet.api.settings.Validator;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.Nullable;
+import org.thinkingstudio.bedsheet.loader.FoxifiedLoader;
 
 import java.util.List;
 
 public class GcaValidators {
-    public static final boolean CARPET_AMS_ADDITION = FabricLoader.getInstance().isModLoaded("carpet-ams-addition");
+    public static final boolean CARPET_AMS_ADDITION = FoxifiedLoader.isModLoaded("carpet-ams-addition");
 
     public static class EnderChest extends Validator<String> {
         public static final List<String> OPTIONS = List.of("true", "false", "ender_chest");
