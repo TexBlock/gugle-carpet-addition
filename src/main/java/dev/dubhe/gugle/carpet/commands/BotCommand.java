@@ -2,6 +2,7 @@ package dev.dubhe.gugle.carpet.commands;
 
 import carpet.CarpetSettings;
 import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import carpet.utils.CommandHelper;
@@ -9,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -36,7 +38,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-//#if MC>=12104
+//#if MC>=12102
 //$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 //$$ import java.util.Set;
 //#endif
@@ -115,6 +117,21 @@ public class BotCommand {
                                 .then(
                                     Commands.argument("name", StringArgumentType.greedyString())
                                         .executes(BotCommand::groupCreate)
+                                )
+                        )
+                        .then(
+                            Commands.literal("generated")
+                                .then(
+                                    Commands.argument("name", StringArgumentType.word())
+                                        .executes(BotCommand::groupGenerated)
+                                        .then(
+                                            Commands.argument("count", IntegerArgumentType.integer(1, 32))
+                                                .then(
+                                                    Commands.argument("load", BoolArgumentType.bool())
+                                                        .executes(BotCommand::groupGenerated)
+                                                )
+                                                .executes(BotCommand::groupGenerated)
+                                        )
                                 )
                         )
                         .then(
@@ -339,6 +356,63 @@ public class BotCommand {
         return 1;
     }
 
+    private static int groupGenerated(CommandContext<CommandSourceStack> context) {
+        BOT_INFO.init(context);
+        BOT_GROUP_INFO.init(context);
+        CommandSourceStack source = context.getSource();
+        String groupName = StringArgumentType.getString(context, "name");
+        int groupCount = IntegerArgumentType.getInteger(context, "count");
+        boolean groupLoad = BoolArgumentType.getBool(context, "load");
+        if (BOT_GROUP_INFO.map.containsKey(groupName)) {
+            source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
+            return 0;
+        }
+        BotGroupInfo groupInfo = new BotGroupInfo(groupName, new ArrayList<>());
+        BOT_GROUP_INFO.map.put(groupName, groupInfo);
+        ServerPlayer player = source.getPlayer();
+        if (player == null) {
+            source.sendFailure(Component.literal("Command source must be player."));
+            return 0;
+        }
+        int result = 0;
+        for (int i = 0; i < groupCount; i++) {
+            String botName = "bot_%s_%s".formatted(groupName, i);
+            if (BOT_INFO.map.containsKey(botName)) {
+                source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
+                continue;
+            }
+            BotCommand.BOT_INFO.map.put(
+                botName,
+                new BotInfo(
+                    botName,
+                    botName,
+                    player.position(),
+                    player.getRotationVector(),
+                    player.level().dimension(),
+                    player.gameMode.getGameModeForPlayer(),
+                    player.getAbilities().flying,
+                    FakePlayerSerializer.actionPackToJson(new EntityPlayerActionPack(player))
+                )
+            );
+            List<String> botNames = groupInfo.bots;
+            botNames.add(botName);
+            result++;
+        }
+        BOT_INFO.save();
+        BOT_GROUP_INFO.save();
+        if (groupLoad) {
+            List<String> botNames = groupInfo.bots;
+            for (String botName : new ArrayList<>(botNames)) {
+                if (!BOT_INFO.map.containsKey(botName)) {
+                    continue;
+                }
+                load(botName, source::sendFailure);
+            }
+        }
+        source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
+        return result;
+    }
+
     private static int groupCreate(CommandContext<CommandSourceStack> context) {
         BOT_GROUP_INFO.init(context);
         CommandSourceStack source = context.getSource();
@@ -466,7 +540,7 @@ public class BotCommand {
                     EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, current, ClientInformation.createDefault());
                     instance.fixStartingPosition = () -> instance.moveTo(botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
                     BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(current, 0, instance.clientInformation(), false));
-                    //#if MC>=12104
+                    //#if MC>=12102
                     //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
                     //#else
                     instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
@@ -477,7 +551,7 @@ public class BotCommand {
                     if (attribute != null) attribute.setBaseValue(0.6000000238418579);
                     instance.gameMode.changeGameModeForPlayer(botInfo.mode);
                     BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);
-                    //#if MC>=12104
+                    //#if MC>=12102
                     //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
                     //#else
                     BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
