@@ -28,10 +28,7 @@ preprocess {
 
 repositories {
     mavenLocal()
-    maven {
-        name 'mavenCentral'
-        url 'https://repo1.maven.org/maven2/'
-    }
+    mavenCentral()
     maven {
         name 'CjsahMaven'
         url 'https://server.cjsah.net:1002/maven/'

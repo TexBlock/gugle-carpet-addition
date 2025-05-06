@@ -2,7 +2,7 @@ plugins {
     id "me.modmuss50.mod-publish-plugin" version "0.8.3"
 }
 
-apply plugin: 'fabric-loom'
+apply plugin: 'dev.architectury.loom'
 apply plugin: 'com.replaymod.preprocess'
 
 int mcVersion = 1
@@ -26,16 +26,9 @@ preprocess {
     tabIndentation = true
 }
 
-configurations {
-    modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
-}
-
 repositories {
     mavenLocal()
-    maven {
-        name 'mavenCentral'
-        url 'https://repo1.maven.org/maven2/'
-    }
+    mavenCentral()
     maven {
         name 'CjsahMaven'
         url 'https://server.cjsah.net:1002/maven/'
@@ -44,6 +37,14 @@ repositories {
         name 'CurseMaven'
         url "https://www.cursemaven.com"
     }
+    maven {
+        name "ModrinthMaven"
+        url "https://api.modrinth.com/maven"
+    }
+    maven {
+        name "NeoForged"
+        url "https://maven.neoforged.net/releases/"
+    }
 }
 
 loom {
@@ -51,7 +52,8 @@ loom {
 }
 
 remapJar {
-    remapperIsolation = true
+    atAccessWideners.add("gca.accesswidener")
+    //remapperIsolation = true
 }
 
 JavaVersion SOURCE_JAVA_VERSION
@@ -76,15 +78,15 @@ dependencies {
     mappings loom.layered() {
         officialMojangMappings()
     }
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    neoForge "net.neoforged:neoforge:${project.neoforge_version}"
 
     // fabric-carpet
-    modImplementation("curse.maven:carpet-349239:${project.carpet_core_version}")
+    modImplementation("org.thinkingstudio.bedsheet:bedsheet:${project.carpet_core_version}")
     // jep
     include(implementation 'jep:jep:2.24')
     // mixin-extras
     if (mcVersion < 12100) {
-        include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
+        include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-neoforge:${project.mixinextras_version}")))
     }
 }
 
@@ -96,24 +98,17 @@ version = 'v' + fullModVersion
 group = project.maven_group
 archivesBaseName = project.archives_base_name + '-mc' + project.minecraft_version
 
-String fabric_id = "fabric-api"
-if (mcVersion < 11800) {
-    fabric_id = "fabric"
-}
-
 processResources {
     from "gca.accesswidener"
 
     inputs.property "version", project.version
 
-    filesMatching("fabric.mod.json") {
+    filesMatching("META-INF/neoforge.mods.toml") {
         def valueMap = [
-                "version"          : fullModVersion,
-                "id"               : project.mod_id,
-                "name"             : project.archives_base_name,
-                "minecraft_support": project.minecraft_support_version,
-                "fabric_loader"    : project.loader_version,
-                "fabric_api_id"    : fabric_id
+                "version"                   : fullModVersion,
+                "neoforge_version_rage"     : project.neoforgeVersionRage,
+                "minecraft_version_rage"    : project.minecraftVersionRage,
+                "bedsheet_version_rage"     : project.bedsheetVersionRage
         ]
         expand valueMap
     }
@@ -135,18 +130,17 @@ publishMods {
     file = remapJar.archiveFile
     changelog = "Changelog"
     type = BETA
-    modLoaders.add("fabric")
-    modLoaders.add("quilt")
+    modLoaders.add("neoforge")
 
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        projectId = "662867"
+        //projectId = "662867"
         minecraftVersions.add(project.game_versions)
     }
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        projectId = "UHjbX5mk"
+        //projectId = "UHjbX5mk"
         minecraftVersions.add(project.game_versions)
     }
 }
